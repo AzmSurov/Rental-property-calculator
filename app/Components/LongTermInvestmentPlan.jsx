@@ -5,6 +5,8 @@ import React, { useState, useCallback } from 'react';
 import { TrendingUp } from "lucide-react"
 
 import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from "@/components/ui/card";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Slider } from "@/components/ui/slider";
@@ -20,7 +22,8 @@ import {
     ChartLegend, ChartLegendContent
   } from "@/components/ui/chart"
 const LongTermInvestmentPlan = () => {
-    const [properties, setProperties] = useState(Array(10).fill().map(() => [
+    const [totalYears, setTotalYears] = useState(10);
+    const [properties, setProperties] = useState(Array(totalYears).fill().map(() => [
         {
           propertyPrice: 250000,
           downPaymentPercentage: 20,
@@ -65,6 +68,8 @@ const LongTermInvestmentPlan = () => {
       vacancyAmount
     } = property;
 
+
+
     const downPayment = propertyPrice * (downPaymentPercentage / 100);
     const loanAmount = propertyPrice - downPayment;
     const monthlyInterestRate = (interestRate / 100) / 12;
@@ -99,6 +104,45 @@ const LongTermInvestmentPlan = () => {
     };
   }, []);
 
+  const handleTotalYearsChange = (value) => {
+    const newTotalYears = parseInt(value);
+    setTotalYears(newTotalYears);
+    
+    // Update properties array
+    setProperties(prevProperties => {
+      const newProperties = [...prevProperties];
+      if (newTotalYears > prevProperties.length) {
+        // Add new years
+        for (let i = prevProperties.length; i < newTotalYears; i++) {
+          newProperties.push([{
+            propertyPrice: 250000,
+            downPaymentPercentage: 20,
+            interestRate: 5,
+            mortgageTerm: 30,
+            monthlyRent: 1800,
+            propertyTaxType: 'percentage',
+            propertyTaxRate: 1.5,
+            propertyTaxAmount: 3750,
+            insuranceType: 'percentage',
+            insuranceRate: 0.4,
+            insuranceAmount: 1000,
+            maintenanceType: 'percentage',
+            maintenanceRate: 1,
+            maintenanceAmount: 2500,
+            condoFees: 0,
+            vacancyType: 'percentage',
+            vacancyRate: 5,
+            vacancyAmount: 1080,
+          }]);
+        }
+      } else if (newTotalYears < prevProperties.length) {
+        // Remove excess years
+        newProperties.splice(newTotalYears);
+      }
+      return newProperties;
+    });
+  };
+
   const handlePropertyChange = useCallback((year, propertyIndex, field, value) => {
     setProperties(prevProperties => {
       const newProperties = [...prevProperties];
@@ -130,9 +174,9 @@ const LongTermInvestmentPlan = () => {
   }, []);
 
   const renderYearGrid = () => {
-    const years = Array.from({ length: 10 }, (_, i) => i + 1);
+    const years = Array.from({ length: totalYears }, (_, i) => i + 1);
     return (
-      <div className="grid grid-cols-5 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
         {years.map((year) => (
           <Card key={year} className="p-4">
             <CardHeader>
@@ -151,7 +195,8 @@ const LongTermInvestmentPlan = () => {
                 />
                 
               </div>
-              {properties[year - 1].map((property, index) => (
+            <div className="flex flex-wrap gap-2">
+            {properties[year - 1].map((property, index) => (
                 <Dialog key={index}>
 <DialogTrigger asChild>
         <Button className="flex items-center gap-2 mb-2">
@@ -345,6 +390,7 @@ const LongTermInvestmentPlan = () => {
                   </DialogContent>
                 </Dialog>
               ))}
+            </div>
             </CardContent>
           </Card>
         ))}
@@ -356,7 +402,7 @@ const LongTermInvestmentPlan = () => {
     let cumulativeData = [];
     let totalProfit = 0;
   
-    for (let year = 1; year <= 10; year++) {
+    for (let year = 1; year <= totalYears; year++) {
       let yearlyProfit = 0;
       for (let i = 0; i < year; i++) {
         yearlyProfit += properties[i].reduce((sum, property) => sum + property.netCashFlow * 12, 0);
@@ -370,14 +416,14 @@ const LongTermInvestmentPlan = () => {
     }
   
     return cumulativeData;
-  }, [properties]);
+  }, [properties, totalYears]);
 
 
   const calculateEquityBuildUp = useCallback(() => {
     let equityData = [];
     let totalEquity = 0;
   
-    for (let year = 1; year <= 10; year++) {
+    for (let year = 1; year <= totalYears; year++) {
       let yearlyEquity = 0;
       for (let i = 0; i < year; i++) {
         yearlyEquity += properties[i].reduce((sum, prop) => {
@@ -412,26 +458,22 @@ const LongTermInvestmentPlan = () => {
     }
   
     return equityData;
-  }, [properties]);
+  }, [properties, totalYears]);
 
   const calculateCashOnCash = useCallback(() => {
     let cashOnCashData = [];
   
-    for (let year = 1; year <= 10; year++) {
+    for (let year = 1; year <= totalYears; year++) {
       let totalCashFlow = 0;
       let totalInvestment = 0;
   
       for (let i = 0; i < year; i++) {
         properties[i].forEach(property => {
-          // Calculate annual cash flow
           totalCashFlow += property.netCashFlow * 12;
-  
-          // Calculate total investment (assuming down payment is the investment)
           totalInvestment += property.propertyPrice * (property.downPaymentPercentage / 100);
         });
       }
   
-      // Calculate Cash on Cash return
       const cashOnCash = totalInvestment > 0 ? (totalCashFlow / totalInvestment) * 100 : 0;
   
       cashOnCashData.push({
@@ -441,7 +483,7 @@ const LongTermInvestmentPlan = () => {
     }
   
     return cashOnCashData;
-  }, [properties]);
+  }, [properties, totalYears]);
 
   const calculateBreakeven = useCallback(() => {
     let breakevenData = [];
@@ -452,7 +494,7 @@ const LongTermInvestmentPlan = () => {
         let cumulativeCashFlow = 0;
         let breakevenYear = 0;
   
-        while (cumulativeCashFlow < initialInvestment) {
+        while (cumulativeCashFlow < initialInvestment && breakevenYear <= totalYears) {
           breakevenYear++;
           cumulativeCashFlow += property.netCashFlow * 12;
         }
@@ -460,14 +502,14 @@ const LongTermInvestmentPlan = () => {
         breakevenData.push({
           year: yearIndex + 1,
           property: propertyIndex + 1,
-          breakevenYear: breakevenYear,
+          breakevenYear: breakevenYear <= totalYears ? breakevenYear : `>${totalYears}`,
           initialInvestment,
         });
       });
     });
   
     return breakevenData;
-  }, [properties]);
+  }, [properties, totalYears]);
 
   const chartCumulativeProfitConfig = {
     cumulativeProfit: {
@@ -500,12 +542,27 @@ const LongTermInvestmentPlan = () => {
 
   return (
     <div className='container mx-auto'>
-      <h1 className="text-2xl font-bold mb-4">Long Term Investment Plan</h1>
+      <h1 className="text-2xl md:text-3xl lg:text-4xl font-bold mb-4 text-center">Long Term Investment Plan</h1>
+      <div className="mb-4">
+        <Label htmlFor="total-years">Total Years</Label>
+        <Select onValueChange={handleTotalYearsChange} defaultValue={totalYears.toString()}>
+          <SelectTrigger className="w-[180px]">
+            <SelectValue placeholder="Select total years" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="10">10 years</SelectItem>
+            <SelectItem value="15">15 years</SelectItem>
+            <SelectItem value="20">20 years</SelectItem>
+            <SelectItem value="25">25 years</SelectItem>
+            <SelectItem value="30">30 years</SelectItem>
+          </SelectContent>
+        </Select>
+      </div>
       {renderYearGrid()}
 
       <div className="mt-8 bg-white p-4 rounded-lg">
       <Tabs defaultValue="cumulative-profit" className="w-full ">
-        <TabsList className="grid w-full grid-cols-4 bg-white gap-10">
+        <TabsList className="grid w-full grid-cols-2 md:grid-cols-4 gap-2 bg-white py-6 sm:py-0">
           <TabsTrigger className=" text-black" value="cumulative-profit">Cumulative Profit</TabsTrigger>
           <TabsTrigger className=" text-black" value="equity-build-up">Equity Build Up</TabsTrigger>
           <TabsTrigger className=" text-black" value="cash-on-cash">Cash On Cash</TabsTrigger>
@@ -537,6 +594,7 @@ const LongTermInvestmentPlan = () => {
                     tickLine={false}
                     axisLine={true}
                     tickMargin={8}
+                    
                   />
                   <YAxis
                     tickLine={false}

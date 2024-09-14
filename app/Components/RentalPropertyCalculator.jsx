@@ -112,16 +112,16 @@ const RentalPropertyCalculator = () => {
     const chartResultsConfig = {
         monthlyRent: {
           label: "Monthly Rent",
-          color: "hsl(var(--chart-1))",
+          color: "#2662D9",
 
         },
         totalCosts: {
           label: "Total Costs",
-          color: "hsl(var(--chart-2))",
+          color: "hsl(var(--chart-1))",
         },
         netCashFlow: {
           label: "Net Cash Flow",
-          color: "hsl(var(--chart-3))",
+          color: "hsl(var(--chart-1))",
         },
       }
     const [growthPeriod, setGrowthPeriod] = useState('10');
@@ -344,7 +344,7 @@ const RentalPropertyCalculator = () => {
   };
 
   return (
-    <div>
+    <div className="">
         <h1 className="text-5xl font-bold text-center py-4">Rental Property Calculator</h1>
             <div className="flex ">
         
