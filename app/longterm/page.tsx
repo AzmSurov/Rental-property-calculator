@@ -6,6 +6,7 @@ import LongTermInvestmentPlan from '../Components/LongTermInvestmentPlan'
 const Longterm = () => {
   return (
     <div>
+
         <LongTermInvestmentPlan />
     </div>
   )

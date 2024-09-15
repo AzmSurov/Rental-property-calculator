@@ -91,3 +91,13 @@ body {
   }
 }
 
+
+.what-if-scenario .select-container {
+  display: inline-block;
+  vertical-align: middle;
+}
+
+.what-if-scenario .text-content {
+  display: inline;
+}
+
