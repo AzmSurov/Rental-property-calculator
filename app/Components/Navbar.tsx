@@ -13,6 +13,7 @@ const Navbar = () => {
                     Rental Property Calculator
                 </Link>
                 <Link className={` ${pathname === '/longterm' ? 'bg-gray-700 text-white px-4 py-2 rounded-md' : ''}`} href="/longterm">Long Term Investment Plan</Link>
+                <Link className={` ${pathname === '/whatif' ? 'bg-gray-700 text-white px-4 py-2 rounded-md' : ''}`} href="/whatif">What If Scenarios</Link>
         </div>
     </div>
   )
